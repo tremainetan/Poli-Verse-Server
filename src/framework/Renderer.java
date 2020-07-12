@@ -17,7 +17,7 @@ public class Renderer {
 	public JTextField textField = new JTextField(50);
 	public JTextArea messageArea = new JTextArea(16, 50);
 	
-	public String lastCommand = "";
+	public volatile String lastCommand = "";
 	
 	public void createWindow() {
 		frame = new JFrame("Poli-Verse");

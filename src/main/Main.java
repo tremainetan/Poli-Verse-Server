@@ -53,11 +53,10 @@ public class Main {
 	private void getName() throws Exception {
 		
 		Data data = FileManager.readData();
-		boolean REMEMBERME = data.REMEMBERME;
 		USERNAME = data.USERNAME;
 		PASSWORD = data.PASSWORD;
 		
-		if (!REMEMBERME) {
+		if (!data.REMEMBERME) {
 			if (USERNAME == null) {
 				//Sign Up
 				boolean doneRememberMe = false;
@@ -75,14 +74,20 @@ public class Main {
 					while (REM_ME_COMMAND.isBlank()) REM_ME_COMMAND = renderer.lastCommand;
 					renderer.lastCommand = "";
 					if (REM_ME_COMMAND.equals("Y")) {
-						REMEMBERME = true;
+						data.REMEMBERME = true;
 						doneRememberMe = true;
 					}
 					else if (REM_ME_COMMAND.equals("N")) {
-						REMEMBERME = false;
+						data.REMEMBERME = false;
 						doneRememberMe = true;
 					}
 				}
+				
+				//Remember Me Saved Directly
+				data.USERNAME = USERNAME;
+				data.PASSWORD = PASSWORD;
+				FileManager.writeData(data);
+				
 			}
 			else {
 				
@@ -93,14 +98,10 @@ public class Main {
 					String usernameInput = "";
 					String passwordInput = "";
 					renderer.print("Username: ");
-					while (usernameInput.isBlank()) {
-						usernameInput = renderer.lastCommand;
-					}
+					while (usernameInput.isBlank()) usernameInput = renderer.lastCommand;
 					renderer.lastCommand = "";
 					renderer.print("Password: ");
-					while (passwordInput.isBlank()) {
-						passwordInput = renderer.lastCommand;
-					}
+					while (passwordInput.isBlank()) passwordInput = renderer.lastCommand;
 					renderer.lastCommand = "";
 					
 					//Received a Non-Blank Username and Password
@@ -117,6 +118,8 @@ public class Main {
 				
 			}
 		}
+		
+		renderer.print("Successfully Logged In as " + USERNAME + "!");
 		
 	}
 	
