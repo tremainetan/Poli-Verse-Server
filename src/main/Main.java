@@ -11,6 +11,8 @@ import framework.Renderer;
 public class Main {
 	
 	private String serverAddress = "localhost";
+	private int PORT = 59001;
+	
 	private Random r;
 	private Renderer renderer;
 	private Client client;
@@ -35,10 +37,7 @@ public class Main {
 			renderer.textField.requestFocus();
 			
 			getName();
-			
-			System.out.println("Gotten Particulars And Logged In!");
-			System.out.println("Username: " + USERNAME);
-			System.out.println("Password: " + PASSWORD);
+			client.createConnection(serverAddress, PORT);
 			
 			loop();
 			

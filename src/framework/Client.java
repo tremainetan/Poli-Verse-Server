@@ -14,8 +14,9 @@ public class Client {
 		boolean connected = false;
 		try {
 			socket = new Socket(serverAddress, PORT);
-			socketIn = new ObjectInputStream(socket.getInputStream());
 			socketOut = new ObjectOutputStream(socket.getOutputStream());
+			socketOut.flush();
+			socketIn = new ObjectInputStream(socket.getInputStream());
 			connected = true;
 		}
 		catch (Exception e) {
