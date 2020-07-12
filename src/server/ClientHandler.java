@@ -2,10 +2,8 @@ package server;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.time.LocalDate;
-import java.util.HashMap;
 
 import datastructures.MessagePacket;
 
@@ -16,8 +14,6 @@ public class ClientHandler implements Runnable {
 	private ObjectOutputStream socketOut;
 	
 	private LocalDate lastDate;
-	
-	private static HashMap<String, OutputStream> writers = new HashMap<String, OutputStream>();
 	
 	public ClientHandler(Socket socket) {
 		this.socket = socket;
@@ -30,6 +26,7 @@ public class ClientHandler implements Runnable {
 		try {
 			socketIn = new ObjectInputStream(socket.getInputStream());
 			socketOut = new ObjectOutputStream(socket.getOutputStream());
+			socketOut.flush();
 			
 			//Getting Name
 			while (true) {
@@ -48,9 +45,9 @@ public class ClientHandler implements Runnable {
 				if (username == null) {
 					return;
 				}
-				synchronized (writers) {
-					if (!username.isBlank() && !writers.containsKey(username)) {
-						writers.put(username, socketOut);
+				synchronized (Main.writers) {
+					if (!username.isBlank() && !Main.writers.containsKey(username)) {
+						Main.writers.put(username, socketOut);
 						break;
 					}
 				}
@@ -83,7 +80,7 @@ public class ClientHandler implements Runnable {
 			if (username != null && socketOut != null) {
 				//Client Quitting
 				System.out.println(username + " has left");
-				writers.remove(username);
+				Main.writers.remove(username);
 			}
 			try {
 				socket.close();
