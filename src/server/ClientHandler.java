@@ -62,9 +62,9 @@ public class ClientHandler implements Runnable {
 				if (username == null) {
 					return;
 				}
-				synchronized (Main.sockets) {
-					if (!username.isBlank() && !Main.sockets.containsKey(username)) {
-						Main.sockets.put(username, socket);
+				synchronized (ServerMain.sockets) {
+					if (!username.isBlank() && !ServerMain.sockets.containsKey(username)) {
+						ServerMain.sockets.put(username, socket);
 						break;
 					}
 				}
@@ -106,9 +106,9 @@ public class ClientHandler implements Runnable {
 				if (username == null) {
 					return;
 				}
-				synchronized (Main.sockets) {
-					if (!Main.sockets.containsKey(username)) {
-						Main.sockets.put(username, socket);
+				synchronized (ServerMain.sockets) {
+					if (!ServerMain.sockets.containsKey(username)) {
+						ServerMain.sockets.put(username, socket);
 						break;
 					}
 				}
@@ -146,7 +146,7 @@ public class ClientHandler implements Runnable {
 			if (username != null && socketOut != null) {
 				//Client Quitting
 				System.out.println(username + " has left");
-				Main.sockets.remove(username);
+				ServerMain.sockets.remove(username);
 			}
 			try {
 				socket.close();

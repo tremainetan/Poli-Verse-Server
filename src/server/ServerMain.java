@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 
-public class Main {
+public class ServerMain {
 	
 	private static int PORT = 59001;
 	
