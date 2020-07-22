@@ -25,9 +25,18 @@ public class FileManager {
 	
 	public static Data readData() throws Exception {
 		Data data = null;
+		FileInputStream fileIn;
+		ObjectInputStream in;
 		
-		FileInputStream fileIn = new FileInputStream("res/DATA.ser");
-		ObjectInputStream in = new ObjectInputStream(fileIn);
+		try {
+			fileIn = new FileInputStream("res/DATA.ser");
+		}
+		catch (Exception e) {
+			//File not Found
+			writeData(new Data());
+			fileIn = new FileInputStream("res/DATA.ser");
+		}
+		in = new ObjectInputStream(fileIn);
 		data = (Data) in.readObject();
 		in.close();
 		fileIn.close();

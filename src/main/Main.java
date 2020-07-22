@@ -25,10 +25,9 @@ public class Main {
 		
 		try {
 			
-			this.renderer = new Renderer();
-			this.client = new Client();
-			this.r = new Random();
-			this.quotes = FileManager.readTextFromFile("QUOTES.ini");
+			renderer = new Renderer();
+			r = new Random();
+			quotes = FileManager.readTextFromFile("QUOTES.ini");
 			
 			renderer.createWindow();
 			
@@ -37,16 +36,12 @@ public class Main {
 			renderer.textField.requestFocus();
 			
 			getName();
-			client.createConnection(serverAddress, PORT);
 			
-			loop();
+			client = new Client(serverAddress, USERNAME, PORT);
+			client.run();
 			
 			
 		} catch (Exception e) {e.printStackTrace();}
-		
-	}
-	
-	private void loop() {
 		
 	}
 	
@@ -55,6 +50,9 @@ public class Main {
 		Data data = FileManager.readData();
 		USERNAME = data.USERNAME;
 		PASSWORD = data.PASSWORD;
+		
+		System.out.println(USERNAME);
+		System.out.println(PASSWORD);
 		
 		if (!data.REMEMBERME) {
 			if (USERNAME == null) {
