@@ -1,5 +1,6 @@
 package server;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -15,43 +16,108 @@ public class ClientHandler implements Runnable {
 	
 	private LocalDate lastDate;
 	
+	private String username;
+	
 	public ClientHandler(Socket socket) {
+		
 		this.socket = socket;
 		this.lastDate = null;
-	}
-	
-	public void run() {
 		
-		String username = "";
 		try {
+			
 			socketIn = new ObjectInputStream(socket.getInputStream());
 			socketOut = new ObjectOutputStream(socket.getOutputStream());
 			socketOut.flush();
 			
-			//Getting Name
-			while (true) {
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private void getName() {
+		try {
+			Object obj = null;
+			boolean hasObject = true;
+			while (hasObject) {
+				while (true) {
+					try {
+						obj = socketIn.readObject();
+						hasObject = true;
+						break;
+					}
+					catch (Exception e) {hasObject = false;}
+				}
 				
-				//Create New File and Write to It
-				MessagePacket data = new MessagePacket();
-				data.FROM = "";
-				data.TO = "";
-				data.MESSAGESTRING = "SUBMITNAME";
-				data.MESSAGEFILE = null;
-				socketOut.writeObject(data);
-		        
-		        //Get name from Client
-				data = (MessagePacket) socketIn.readObject();
-				username = data.FROM;
+				//Unpack and Process Object
+				MessagePacket messageReceive = (MessagePacket) obj;
+	
+				if (messageReceive.TO == null) {
+					//Message is to Server
+					if (messageReceive.MESSAGESTRING.equals("SUBMITNAME")) {
+						username = messageReceive.FROM;
+						System.out.println(username);
+					}
+				}
 				if (username == null) {
 					return;
 				}
-				synchronized (Main.writers) {
-					if (!username.isBlank() && !Main.writers.containsKey(username)) {
-						Main.writers.put(username, socketOut);
+				synchronized (Main.sockets) {
+					if (!username.isBlank() && !Main.sockets.containsKey(username)) {
+						Main.sockets.put(username, socket);
 						break;
 					}
 				}
+				
 			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void run() {
+		
+		////GET NAME
+		getName();
+		
+		try {
+			Object obj = null;
+			boolean hasObject = true;
+			while (hasObject) {
+				while (true) {
+					try {
+						obj = socketIn.readObject();
+						hasObject = true;
+						break;
+					}
+					catch (Exception e) {hasObject = false;}
+				}
+				
+				//Unpack and Process Object
+				MessagePacket messageReceive = (MessagePacket) obj;
+	
+				if (messageReceive.TO == null) {
+					//Message is to Server
+					if (messageReceive.MESSAGESTRING.equals("SUBMITNAME")) {
+						username = messageReceive.FROM;
+					}
+				}
+				if (username == null) {
+					return;
+				}
+				synchronized (Main.sockets) {
+					if (!Main.sockets.containsKey(username)) {
+						Main.sockets.put(username, socket);
+						break;
+					}
+				}
+				
+			}
+			
+		} catch (Exception e) {e.printStackTrace();}
+		
+		try {
 			MessagePacket data = new MessagePacket();
 			data.FROM = "";
 			data.TO = username;
@@ -67,7 +133,7 @@ public class ClientHandler implements Runnable {
 			}
 			System.out.println(username + " has joined");
 			
-			//Reading From Client
+			////READ MESSAGES INCOMING
 			while (socketIn.readObject() != null) {
 				data = (MessagePacket) socketIn.readObject();
 			}
@@ -80,7 +146,7 @@ public class ClientHandler implements Runnable {
 			if (username != null && socketOut != null) {
 				//Client Quitting
 				System.out.println(username + " has left");
-				Main.writers.remove(username);
+				Main.sockets.remove(username);
 			}
 			try {
 				socket.close();

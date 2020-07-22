@@ -1,7 +1,7 @@
 package server;
 
-import java.io.OutputStream;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
@@ -10,7 +10,7 @@ public class Main {
 	
 	private static int PORT = 59001;
 	
-	public static HashMap<String, OutputStream> writers = new HashMap<String, OutputStream>();
+	public static HashMap<String, Socket> sockets = new HashMap<String, Socket>();
 	
 	public static void main(String[] args) {
 		LocalDate startDate = LocalDate.now();
