@@ -8,7 +8,7 @@ import framework.Client;
 import framework.FileManager;
 import framework.Renderer;
 
-public class Main {
+public class ClientMain {
 	
 	private String serverAddress = "localhost";
 	private int PORT = 59001;
@@ -21,7 +21,7 @@ public class Main {
 	private String USERNAME = null;
 	private String PASSWORD = null;
 	
-	public Main() {
+	public ClientMain() {
 		
 		try {
 			
@@ -122,7 +122,7 @@ public class Main {
 	}
 	
 	public static void main(String[] args) {
-		new Main();
+		new ClientMain();
 	}
 	
 }
