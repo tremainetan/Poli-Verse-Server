@@ -1,4 +1,4 @@
-package framework;
+package communication;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -6,7 +6,7 @@ import java.net.Socket;
 
 import datastructures.MessagePacket;
 
-public class Client {
+public class ClientCommunication implements Runnable {
 	
 	private String username;
 	
@@ -14,40 +14,39 @@ public class Client {
 	private ObjectInputStream socketIn;
 	private ObjectOutputStream socketOut;
 	
-	public Client(String serverAddress, String username, int PORT) {
+	public ClientCommunication(String serverAddress, String username, int PORT) {
 		
 		this.username = username;
 		createConnection(serverAddress, PORT);
 		
 	}
 
+	private MessagePacket readSocketIn() throws Exception {
+		
+		MessagePacket obj = null;
+		obj = (MessagePacket) socketIn.readObject();
+		return obj;
+		
+	}
+	
 	public void run() {
 			
 		////READ MESSAGES INCOMING
+		MessagePacket messageReceive = null;
 		try {
-			Object obj = null;
-			boolean hasObject = true;
-			
-			while (hasObject) {
-				while (true) {
-					try {
-						obj = socketIn.readObject();
-						hasObject = true;
-						break;
-					}
-					catch (Exception e) {hasObject = false;}
-				}
-				
-				//Object is Present
-				//Unpack and Process Object
-				MessagePacket messageReceive = (MessagePacket) obj;
-				//Not Processed yet
-				
-				
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+			messageReceive = readSocketIn();
+		} catch (Exception e) {}
+		
+		//Temporary Processing:
+		if (messageReceive != null) {
+			System.out.println("Received message from " + messageReceive.FROM + ": " + messageReceive.MESSAGESTRING);
 		}
+		
+	}
+	
+	public void disconnect() throws Exception {
+		MessagePacket messageSending = new MessagePacket(username, null, null, null, false);
+		socketOut.writeObject(messageSending);
 	}
 	
 	private boolean createConnection(String serverAddress, int PORT) {
@@ -57,11 +56,7 @@ public class Client {
 			socketOut = new ObjectOutputStream(socket.getOutputStream());
 			socketOut.flush();
 			socketIn = new ObjectInputStream(socket.getInputStream());
-			MessagePacket submitName = new MessagePacket();
-			submitName.FROM = username;
-			submitName.TO = null;
-			submitName.MESSAGEFILE = null;
-			submitName.MESSAGESTRING = "SUBMITNAME";
+			MessagePacket submitName = new MessagePacket(username, null, "SUBMITNAME", null, true);
 			socketOut.writeObject(submitName);
 			connected = true;
 		}
