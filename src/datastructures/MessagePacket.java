@@ -4,19 +4,20 @@ import java.io.File;
 import java.io.Serializable;
 
 public class MessagePacket implements Serializable {
-
-	private static final long serialVersionUID = -5058303681552590968L;
 	
-	public String FROM = "";
+	private static final long serialVersionUID = 1L;
+	public String FROM = null;
 	public String TO = null;
 	public String MESSAGESTRING = null;
 	public File MESSAGEFILE = null;
+	public boolean CONNECTED = true;
 	
-	public void resetValues() {
-		FROM = "";
-		TO = "";
-		MESSAGESTRING = null;
-		MESSAGEFILE = null;
+	public MessagePacket(String FROM, String TO, String STRING, File FILE, boolean CONNECTED) {
+		this.FROM = FROM;
+		this.TO = TO;
+		this.MESSAGESTRING = STRING;
+		this.MESSAGEFILE = FILE;
+		this.CONNECTED = CONNECTED;
 	}
 	
 }
