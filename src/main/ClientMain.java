@@ -18,13 +18,12 @@ public class ClientMain {
 	private int DATABASE_PORT = 59002;
 	
 	private Random r;
-	private Renderer renderer;
-	private ClientCommunication clientCommunication;
-	private ClientDatabase clientDatabase;
-	private ArrayList<String> quotes = new ArrayList<String>();
+	public Renderer renderer;
+	public ClientCommunication clientCommunication;
+	public ClientDatabase clientDatabase;
+	public ArrayList<String> quotes = new ArrayList<String>();
 	
-	private String USERNAME = null;
-	private String PASSWORD = null;
+	private Data clientData;
 	
 	public ClientMain() {
 		
@@ -40,14 +39,7 @@ public class ClientMain {
 			renderer.frame.addWindowListener(
 				new WindowAdapter() {
 					public void windowClosing(WindowEvent windowEvent) {
-						try {
-							clientDatabase.disconnect();
-							clientCommunication.disconnect();
-						}
-						catch (Exception e) {
-							System.exit(0);
-						}
-						System.exit(0);
+						exit();
 					}
 				}
 			);
@@ -60,94 +52,86 @@ public class ClientMain {
 			
 			Thread databaseThread = new Thread(clientDatabase);
 			databaseThread.start();
-			clientCommunication = new ClientCommunication(serverAddress, USERNAME, COMMUNICATION_PORT);
+			clientCommunication = new ClientCommunication(serverAddress, clientData.USERNAME, COMMUNICATION_PORT);
 			Thread communicationThread = new Thread(clientCommunication);
 			communicationThread.start();
-			
 			
 		} catch (Exception e) {e.printStackTrace();}
 		
 	}
 	
+	private void exit() {
+		try {
+			clientDatabase.disconnect();
+			clientCommunication.disconnect();
+		}
+		catch (Exception e) {
+			System.exit(0);
+		}
+		System.exit(0);
+	}
+	
 	private void getName() throws Exception {
 		
-		Data data = FileManager.readData();
-		USERNAME = data.USERNAME;
-		PASSWORD = data.PASSWORD;
+		String usernameInput;
+		String passwordInput;
 		
-		if (!data.REMEMBERME) {
-			if (USERNAME == null) {
-				//Sign Up
-				boolean nameAccepted = false;
+		Data data = null;
+		
+		if (!FileManager.signedUp()) {
+			//Sign Up
+			
+			while (true) {
 				
-				while (!nameAccepted) {
-					boolean doneRememberMe = false;
-					USERNAME = "";
-					PASSWORD = "";
-					String REM_ME_COMMAND = "";
-					renderer.print("Create Username: ");
-					while (USERNAME.isBlank()) USERNAME = renderer.lastCommand;
-					renderer.lastCommand = "";
-					renderer.print("Create Password: ");
-					while (PASSWORD.isBlank()) PASSWORD = renderer.lastCommand;
-					renderer.lastCommand = "";
-					while (!doneRememberMe) {
-						renderer.print("Remember Particulars? (Y/N)");
-						while (REM_ME_COMMAND.isBlank()) REM_ME_COMMAND = renderer.lastCommand;
-						renderer.lastCommand = "";
-						if (REM_ME_COMMAND.equals("Y")) {
-							data.REMEMBERME = true;
-							doneRememberMe = true;
-						}
-						else if (REM_ME_COMMAND.equals("N")) {
-							data.REMEMBERME = false;
-							doneRememberMe = true;
-						}
-					}
-					if (clientDatabase.nameExists(USERNAME)) {
-						renderer.print("This username has been used");
-					}
-					else nameAccepted = true;
-					
+				usernameInput = "";
+				passwordInput = "";
+				
+				renderer.print("Create Username: ");
+				while (usernameInput.isBlank()) usernameInput = renderer.lastCommand;
+				renderer.lastCommand = "";
+				renderer.print("Create Password: ");
+				while (passwordInput.isBlank()) passwordInput = renderer.lastCommand;
+				renderer.lastCommand = "";
+				if (clientDatabase.nameExists(usernameInput, passwordInput)) {
+					renderer.print("This username has been used");
 				}
-				
-				//Remember Me Saved Directly
-				data.USERNAME = USERNAME;
-				data.PASSWORD = PASSWORD;
-				FileManager.writeData(data);
-				
-			}
-			else {
-				
-				boolean accepted = false;
-				
-				while (!accepted) {
-					
-					String usernameInput = "";
-					String passwordInput = "";
-					renderer.print("Username: ");
-					while (usernameInput.isBlank()) usernameInput = renderer.lastCommand;
-					renderer.lastCommand = "";
-					renderer.print("Password: ");
-					while (passwordInput.isBlank()) passwordInput = renderer.lastCommand;
-					renderer.lastCommand = "";
-					
-					//Received a Non-Blank Username and Password
-					//Check if it is correct
-					
-					if (usernameInput.equals(USERNAME) && passwordInput.equals(PASSWORD)) {
-						accepted = true;
-					}
-					else {
-						renderer.print("Wrong username or password");
-					}
-					
+				else {
+					data = clientDatabase.getData(usernameInput);
+					this.clientData = data;
+					FileManager.writeSignedUp(true);
+					break;
 				}
-				
 			}
 		}
+		else {
+			//Login
+			
+			while (true) {
+				
+				usernameInput = "";
+				passwordInput = "";
+				
+				renderer.print("Username: ");
+				while (usernameInput.isBlank()) usernameInput = renderer.lastCommand;
+				renderer.lastCommand = "";
+				renderer.print("Password: ");
+				while (passwordInput.isBlank()) passwordInput = renderer.lastCommand;
+				renderer.lastCommand = "";
+				
+				//Received a Non-Blank Username and Password
+				//Check if it is correct
+				data = clientDatabase.getData(usernameInput);
+				if (data != null) {
+					if (passwordInput.equals(data.PASSWORD)) break;
+					else renderer.print("Wrong username or password");
+				}
+				else renderer.print("Wrong username or password");
+			}
+			
+			this.clientData = data;
+		}
 		
-		renderer.print("Successfully Logged In as " + USERNAME + "!");
+		renderer.print("Successfully Logged In as " + clientData.USERNAME + "!");
 		
 	}
 	

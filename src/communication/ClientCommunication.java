@@ -45,7 +45,7 @@ public class ClientCommunication implements Runnable {
 	}
 	
 	public void disconnect() throws Exception {
-		MessagePacket messageSending = new MessagePacket(username, null, null, null, false);
+		MessagePacket messageSending = new MessagePacket(username, null, null, false);
 		socketOut.writeObject(messageSending);
 	}
 	
@@ -56,7 +56,7 @@ public class ClientCommunication implements Runnable {
 			socketOut = new ObjectOutputStream(socket.getOutputStream());
 			socketOut.flush();
 			socketIn = new ObjectInputStream(socket.getInputStream());
-			MessagePacket submitName = new MessagePacket(username, null, "SUBMITNAME", null, true);
+			MessagePacket submitName = new MessagePacket(username, null, "SUBMITNAME", true);
 			socketOut.writeObject(submitName);
 			connected = true;
 		}

@@ -4,7 +4,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import datastructures.MessagePacket;
+import datastructures.Data;
+import datastructures.MessagePacketDB;
 
 public class ClientDatabase implements Runnable {
 	
@@ -18,17 +19,17 @@ public class ClientDatabase implements Runnable {
 		
 	}
 	
-	private MessagePacket readSocketIn() throws Exception {
+	private MessagePacketDB readSocketIn() throws Exception {
 		
-		MessagePacket obj = null;
-		obj = (MessagePacket) socketIn.readObject();
+		MessagePacketDB obj = null;
+		obj = (MessagePacketDB) socketIn.readObject();
 		return obj;
 		
 	}
 	
 	public void run() {
 		
-		MessagePacket messageReceive = null;
+		MessagePacketDB messageReceive = null;
 		try {
 			messageReceive = readSocketIn();
 		} catch (Exception e) {}
@@ -40,17 +41,17 @@ public class ClientDatabase implements Runnable {
 	}
 	
 	public void disconnect() throws Exception {
-		MessagePacket messageSending = new MessagePacket(null, null, null, null, false);
+		MessagePacketDB messageSending = new MessagePacketDB(null, null, null, null, false);
 		socketOut.writeObject(messageSending);
 	}
 	
-	public boolean nameExists(String name) throws Exception {
+	public boolean nameExists(String name, String password) throws Exception {
 		boolean nameExists = true;
 		
-		MessagePacket messageSending = new MessagePacket(name, null, "CHECK", null, true);
+		MessagePacketDB messageSending = new MessagePacketDB(name, password, "EXISTS", null, true);
 		socketOut.writeObject(messageSending);
 		
-		MessagePacket messageReceive = readSocketIn();
+		MessagePacketDB messageReceive = readSocketIn();
 		if (messageReceive.FROM == null && messageReceive.TO.equals(name)) {
 			if (messageReceive.MESSAGESTRING.equals("true")) nameExists = true;
 			else nameExists = false;
@@ -58,6 +59,25 @@ public class ClientDatabase implements Runnable {
 		
 		return nameExists;
 		
+	}
+	
+	public Data getData(String name) {
+		Data data = null;
+		MessagePacketDB messageSending = new MessagePacketDB(name, null, "CHECK", null, true);
+		try {
+			socketOut.writeObject(messageSending);
+		}
+		catch (Exception e) {e.printStackTrace();}
+		MessagePacketDB messageReceive = null;
+		
+		try {
+			messageReceive = readSocketIn();
+		}
+		catch (Exception e) {}
+		if (messageReceive.FROM == null && messageReceive.TO.equals(name)) {
+			data = messageReceive.DATA;
+		}
+		return data;
 	}
 	
 	private boolean createConnection(String serverAddress, int PORT) {

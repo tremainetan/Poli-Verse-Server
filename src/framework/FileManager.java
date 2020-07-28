@@ -1,14 +1,9 @@
 package framework;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
-
-import datastructures.Data;
 
 public class FileManager {
 	
@@ -23,35 +18,23 @@ public class FileManager {
 		return lines;
 	}
 	
-	public static Data readData() throws Exception {
-		Data data = null;
-		FileInputStream fileIn;
-		ObjectInputStream in;
-		
-		try {
-			fileIn = new FileInputStream("res/DATA.ser");
-		}
-		catch (Exception e) {
-			//File not Found
-			writeData(new Data());
-			fileIn = new FileInputStream("res/DATA.ser");
-		}
-		in = new ObjectInputStream(fileIn);
-		data = (Data) in.readObject();
-		in.close();
-		fileIn.close();
-		
-		return data;
+	public static boolean signedUp() throws Exception {
+		File f = new File("res/SIGNEDUP.ini");
+		return f.exists();
 	}
 	
-	public static void writeData(Data data) throws Exception {
-		
-		FileOutputStream fileOut = new FileOutputStream("res/DATA.ser");
-		ObjectOutputStream out = new ObjectOutputStream(fileOut);
-		out.writeObject(data);
-		out.close();
-		fileOut.close();
-		
+	public static void writeSignedUp(boolean signedUp) {
+		File f = new File("res/SIGNEDUP.ini");
+		if (signedUp) {
+			if (!f.exists()) {
+				try {
+					f.createNewFile();
+				} catch (IOException e) {}
+			}
+		}
+		else {
+			if (f.exists()) f.delete();
+		}
 	}
 		
 }
