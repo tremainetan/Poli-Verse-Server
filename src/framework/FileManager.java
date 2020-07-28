@@ -5,47 +5,50 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-import datastructures.Names;
+import datastructures.Data;
+import datastructures.Database;
 
 public class FileManager {
 	
-	public static ArrayList<String> NAMES = new ArrayList<>();
+	public static Map<String, Data> data = new HashMap<String, Data>();
 	
 	//Call at the start of ServerMain Program
 	public FileManager() {
 		
 		try {
-			readToArray();
+			readDatabase();
 		} catch (Exception e) {e.printStackTrace();}
 		
 	}
 	
 	//Private Processing Methods
-	private static void readToArray() throws Exception {
-		Names names = null;
+	private static void readDatabase() throws Exception {
+		Database database = null;
 		FileInputStream fileIn;
 		ObjectInputStream in;
 		
 		try {
-			fileIn = new FileInputStream("res/NAMES.ser");
+			fileIn = new FileInputStream("res/DATABASE.ser");
 		}
 		catch (Exception e) {
 			//File not Found
-			writeData(new Names());
-			fileIn = new FileInputStream("res/NAMES.ser");
+			updateDatabase();
+			fileIn = new FileInputStream("res/DATABASE.ser");
 		}
 		in = new ObjectInputStream(fileIn);
-		names = (Names) in.readObject();
-		NAMES = names.NAMES;
+		database = (Database) in.readObject();
+		data = database.DATA;
 		
 		in.close();
 		fileIn.close();
 	}
 	
-	private static void writeData(Names data) throws Exception {
+	private static void writeDatabase(Database data) throws Exception {
 		
-		FileOutputStream fileOut = new FileOutputStream("res/NAMES.ser");
+		FileOutputStream fileOut = new FileOutputStream("res/DATABASE.ser");
 		ObjectOutputStream out = new ObjectOutputStream(fileOut);
 		out.writeObject(data);
 		out.close();
@@ -53,11 +56,11 @@ public class FileManager {
 		
 	}
 	
-	private static void updateArray() {
-		Names data = new Names();
-		data.NAMES = NAMES;
+	private static void updateDatabase() {
+		Database database = new Database();
+		database.DATA = data;
 		try {
-			writeData(data);
+			writeDatabase(database);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -66,15 +69,15 @@ public class FileManager {
 	
 	//Methods that other Classes need to use
 	public static boolean nameExists(String name) {
-		if (NAMES.contains(name)) {
+		if (data.containsKey(name)) {
 			return true;
 		}
 		else return false;
 	}
 	
-	public static void addName(String name) {
-		NAMES.add(name);
-		updateArray();
+	public static void addName(String name, String password) {
+		data.put(name, new Data(name, password, new ArrayList<String>()));
+		updateDatabase();
 	}
 	
 }
