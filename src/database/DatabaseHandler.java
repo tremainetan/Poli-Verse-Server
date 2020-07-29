@@ -50,15 +50,17 @@ public class DatabaseHandler implements Runnable {
 					//Client is still connected
 					if (messageIncoming.MESSAGESTRING.equals("EXISTS")) {
 						String name = messageIncoming.FROM;
-						String password = messageIncoming.TO;
 						MessagePacketDB messageSending = null;
-						
 						if (!FileManager.nameExists(name)) {
-							FileManager.addName(name, password);
 							messageSending = new MessagePacketDB(null, name, "false", null, true);
 						}
 						else messageSending = new MessagePacketDB(null, name, "true", null, true);
 						socketOut.writeObject(messageSending);
+					}
+					else if (messageIncoming.MESSAGESTRING.equals("REGISTER")) {
+						String name = messageIncoming.FROM;
+						String password = messageIncoming.TO;
+						FileManager.addName(name, password);
 					}
 					else if (messageIncoming.MESSAGESTRING.equals("CHECK")) {
 						//Getting Password
@@ -66,6 +68,9 @@ public class DatabaseHandler implements Runnable {
 						Data data = FileManager.data.get(name);
 						MessagePacketDB messageSending = new MessagePacketDB(null, name, null, data, true);
 						socketOut.writeObject(messageSending);
+					}
+					else if (messageIncoming.MESSAGESTRING.equals("UPDATEDATA")) {
+						FileManager.updateData(messageIncoming.DATA);
 					}
 				}
 				else break;

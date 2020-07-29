@@ -76,7 +76,12 @@ public class FileManager {
 	}
 	
 	public static void addName(String name, String password) {
-		data.put(name, new Data(name, password, new ArrayList<String>()));
+		data.put(name, new Data(name, password, new ArrayList<String>(), new ArrayList<String>(), new ArrayList<String>()));
+		updateDatabase();
+	}
+	
+	public static void updateData(Data userData) {
+		data.put(userData.USERNAME, userData);
 		updateDatabase();
 	}
 	
