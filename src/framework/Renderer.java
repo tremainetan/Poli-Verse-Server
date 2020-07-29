@@ -10,6 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.text.DefaultCaret;
 
 public class Renderer {
 	
@@ -21,14 +22,22 @@ public class Renderer {
 	
 	public void createWindow() {
 		frame = new JFrame("Poli-Verse");
+		
 		Font arialFont = new Font("Arial", Font.TRUETYPE_FONT, 20);
+		
 		textField.setFont(arialFont);
 		textField.setEditable(true);
+		
 		messageArea.setFont(arialFont);
 		messageArea.setEditable(false);
+		
+		DefaultCaret caret = (DefaultCaret) messageArea.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		
 		Container contentPane = frame.getContentPane();
 		contentPane.add(textField, BorderLayout.SOUTH);
 		contentPane.add(new JScrollPane(messageArea), BorderLayout.CENTER);
+		
 		frame.pack();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -47,6 +56,10 @@ public class Renderer {
 	
 	public void print(String message) {
 		messageArea.append(message + "\n");
+	}
+	
+	public void updateTitle(String title) {
+		this.frame.setTitle(title);
 	}
 	
 }

@@ -56,6 +56,8 @@ public class ClientMain {
 			
 			getName();
 			
+			renderer.updateTitle("Poli-Verse (" + clientData.USERNAME + ")");
+			
 			Thread databaseThread = new Thread(clientDatabase);
 			databaseThread.start();
 			clientCommunication = new ClientCommunication(serverAddress, clientData.USERNAME, COMMUNICATION_PORT);
@@ -89,6 +91,7 @@ public class ClientMain {
 							renderer.print("/reject <name> - Reject a friend's Request");
 							renderer.print("/request <name> - Request to add a friend");
 							renderer.print("/unfriend <name> - Unfriend a friend");
+							renderer.print("/chat <name> - Enter Chat mode with a friend");
 						}
 						else if (actualCommand.equals("exit")) {
 							exit();
@@ -183,6 +186,14 @@ public class ClientMain {
 							catch (Exception e) {renderer.print("Unfriend Failed...Check that the username is your friend and is not yourself");}
 							
 						}
+						else if (actualCommand.startsWith("chat")) {
+							String name = actualCommand.substring(5);
+							if (clientData.FRIENDS.contains(name)) {
+								state = name;
+								renderer.updateTitle("Poli-Verse (" + clientData.USERNAME + ") [Chatting with " + state + "]");
+							}
+							else renderer.print(name + " is not identified as your friend");
+						}
 						else renderer.print("Invalid Command, type '/help' for possible commands");
 					}
 					else renderer.print("Invalid Command, type '/help' for possible commands");
@@ -191,9 +202,15 @@ public class ClientMain {
 					//Texting Someone
 					if (command.startsWith("/")) {
 						//Command
+						String actualCommand = command.substring(1);
+						if (actualCommand.equals("back")) {
+							renderer.updateTitle("Poli-Verse (" + clientData.USERNAME + ")");
+							state = null;
+						}
 					}
 					else {
 						//Message to send to "<name>"
+						System.out.println("Send to " + state + ": " + command);
 					}
 				}
 				renderer.lastCommand = "";
