@@ -25,6 +25,12 @@ public class ClientMain {
 	
 	private Data clientData;
 	
+	private String state = null;
+	/*
+	 * null - At Main State
+	 * "<name>" - Currently Texting <name>
+	 */
+	
 	public ClientMain() {
 		
 		try {
@@ -56,8 +62,143 @@ public class ClientMain {
 			Thread communicationThread = new Thread(clientCommunication);
 			communicationThread.start();
 			
+			run();
+			
 		} catch (Exception e) {e.printStackTrace();}
 		
+	}
+	
+	private void run() {
+		while (true) {
+			while (!renderer.lastCommand.isBlank()) {
+				//Process Every Command
+				String command = renderer.lastCommand;
+				if (state == null) {
+					//Main State
+					if (command.startsWith("/")) {
+						//Command
+						clientData = clientDatabase.getData(clientData.USERNAME);
+						String actualCommand = command.substring(1);
+						if (actualCommand.equals("help")) {
+							renderer.print("Commands Available:");
+							renderer.print("/exit - Leave the Application");
+							renderer.print("/listfriends - List Current Friends");
+							renderer.print("/listrequests - List People you are Waiting to Accept");
+							renderer.print("/listpending - List People Waiting for you to Accept");
+							renderer.print("/accept <name> - Accept a friend's Request");
+							renderer.print("/reject <name> - Reject a friend's Request");
+							renderer.print("/request <name> - Request to add a friend");
+							renderer.print("/unfriend <name> - Unfriend a friend");
+						}
+						else if (actualCommand.equals("exit")) {
+							exit();
+						}
+						else if (actualCommand.equals("listfriends")) {
+							ArrayList<String> friends = clientData.FRIENDS;
+							if (friends.size() == 0) renderer.print("You currently do not have any friends yet");
+							else {
+								for (int i = 0; i < friends.size(); i++) renderer.print(friends.get(i));
+							}
+						}
+						else if (actualCommand.equals("listrequests")) {
+							ArrayList<String> requests = clientData.REQUESTS;
+							if (requests.size() == 0) renderer.print("No one has requested to follow you yet");
+							else {
+								renderer.print("You have " + requests.size() + " requests:");
+								for (int i = 0; i < requests.size(); i++) renderer.print(requests.get(i));
+							}
+						}
+						else if (actualCommand.equals("listpending")) {
+							ArrayList<String> pending = clientData.PENDING;
+							if (pending.size() == 0) renderer.print("You have no pending requests currently");
+							else {
+								for (int i = 0; i < pending.size(); i++) renderer.print(pending.get(i));
+							}
+						}
+						else if (actualCommand.startsWith("request")) {
+							String requestedName = actualCommand.substring(8);
+							boolean nameExists = false;
+							try {
+								nameExists = clientDatabase.nameExists(requestedName);
+							} catch (Exception e) {}
+							try {
+								if (clientData.USERNAME != requestedName && nameExists) {
+									clientData.PENDING.add(requestedName);
+									clientDatabase.updateData(clientData);
+									clientDatabase.request(clientData.USERNAME, requestedName);
+									renderer.print("Request Successfully sent to " + requestedName);
+								}
+								else {
+									renderer.print("Sending Request Failed...Check that the username exists and is not yourself");
+								}
+							}
+							catch (Exception e) {
+								renderer.print("Sending Request Failed...Check that the username exists and is not yourself");
+							}
+						}
+						else if (actualCommand.startsWith("accept")) {
+							String acceptName = actualCommand.substring(7);
+							try {
+								if (clientData.REQUESTS.contains(acceptName)) {
+									//This username is inside of REQUESTS list
+									clientData.FRIENDS.add(acceptName);
+									clientDatabase.accept(clientData.USERNAME, acceptName);
+									clientData.REQUESTS.remove(acceptName);
+									clientDatabase.updateData(clientData);
+									renderer.print("Successfully Accepted " + acceptName + " as friend!");
+								}
+								else renderer.print("Accept Failed...Check that this user requested to follow you and is not yourself");
+							}
+							catch (Exception e) {
+								renderer.print("Accept Failed...Check that this user requested to follow you and is not yourself");
+							}
+						}
+						else if (actualCommand.startsWith("reject")) {
+							String rejectName = actualCommand.substring(7);
+							try {
+								if (clientData.REQUESTS.contains(rejectName)) {
+									clientDatabase.reject(clientData.USERNAME, rejectName);
+									clientData.REQUESTS.remove(rejectName);
+									clientDatabase.updateData(clientData);
+									renderer.print("Successfully Rejected " + rejectName + "!");
+								}
+							}
+							catch (Exception e) {
+								renderer.print("Rejection Failed...Check that this user requested to follow you and is not yourself");
+							}
+						}
+						else if (actualCommand.startsWith("unfriend")) {
+							String unfriendName = actualCommand.substring(9);
+							try {
+								if (unfriendName != clientData.USERNAME && clientData.FRIENDS.contains(unfriendName)) {
+									clientData.FRIENDS.remove(unfriendName);
+									clientDatabase.updateData(clientData);
+									clientDatabase.unfriend(clientData.USERNAME, unfriendName);
+									renderer.print("Successfully Unfriended " + unfriendName + "!");
+								}
+								else {
+									renderer.print("Unfriend Failed...Check that the username is your friend and is not yourself");
+								}
+							}
+							catch (Exception e) {renderer.print("Unfriend Failed...Check that the username is your friend and is not yourself");}
+							
+						}
+						else renderer.print("Invalid Command, type '/help' for possible commands");
+					}
+					else renderer.print("Invalid Command, type '/help' for possible commands");
+				}
+				else {
+					//Texting Someone
+					if (command.startsWith("/")) {
+						//Command
+					}
+					else {
+						//Message to send to "<name>"
+					}
+				}
+				renderer.lastCommand = "";
+			}
+		}
 	}
 	
 	private void exit() {
@@ -92,10 +233,11 @@ public class ClientMain {
 				renderer.print("Create Password: ");
 				while (passwordInput.isBlank()) passwordInput = renderer.lastCommand;
 				renderer.lastCommand = "";
-				if (clientDatabase.nameExists(usernameInput, passwordInput)) {
+				if (clientDatabase.nameExists(usernameInput)) {
 					renderer.print("This username has been used");
 				}
 				else {
+					clientDatabase.register(usernameInput, passwordInput);
 					data = clientDatabase.getData(usernameInput);
 					this.clientData = data;
 					FileManager.writeSignedUp(true);

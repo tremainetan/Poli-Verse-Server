@@ -29,15 +29,6 @@ public class ClientDatabase implements Runnable {
 	
 	public void run() {
 		
-		MessagePacketDB messageReceive = null;
-		try {
-			messageReceive = readSocketIn();
-		} catch (Exception e) {}
-		//Temporary Processing:
-		if (messageReceive != null) {
-			System.out.println("Received message from " + messageReceive.FROM + ": " + messageReceive.MESSAGESTRING);
-		}
-		
 	}
 	
 	public void disconnect() throws Exception {
@@ -45,10 +36,10 @@ public class ClientDatabase implements Runnable {
 		socketOut.writeObject(messageSending);
 	}
 	
-	public boolean nameExists(String name, String password) throws Exception {
+	public boolean nameExists(String name) throws Exception {
 		boolean nameExists = true;
 		
-		MessagePacketDB messageSending = new MessagePacketDB(name, password, "EXISTS", null, true);
+		MessagePacketDB messageSending = new MessagePacketDB(name, null, "EXISTS", null, true);
 		socketOut.writeObject(messageSending);
 		
 		MessagePacketDB messageReceive = readSocketIn();
@@ -59,6 +50,41 @@ public class ClientDatabase implements Runnable {
 		
 		return nameExists;
 		
+	}
+	
+	public void register(String name, String password) throws Exception {
+		MessagePacketDB messageSending = new MessagePacketDB(name, password, "REGISTER", null, true);
+		socketOut.writeObject(messageSending);
+	}
+	
+	public void updateData(Data data) throws Exception {
+		MessagePacketDB messageSending = new MessagePacketDB(data.USERNAME, null, "UPDATEDATA", data, true);
+		socketOut.writeObject(messageSending);
+	}
+	
+	public void request(String FROM, String TO) throws Exception {
+		Data toData = getData(TO);
+		toData.REQUESTS.add(FROM);
+		updateData(toData);
+	}
+	
+	public void accept(String FROM, String TO) throws Exception {
+		Data toData = getData(TO);
+		toData.PENDING.remove(FROM);
+		toData.FRIENDS.add(FROM);
+		updateData(toData);
+	}
+	
+	public void reject(String FROM, String TO) throws Exception {
+		Data toData = getData(TO);
+		toData.PENDING.remove(FROM);
+		updateData(toData);
+	}
+	
+	public void unfriend(String FROM, String TO) throws Exception {
+		Data toData = getData(TO);
+		toData.FRIENDS.remove(FROM);
+		updateData(toData);
 	}
 	
 	public Data getData(String name) {

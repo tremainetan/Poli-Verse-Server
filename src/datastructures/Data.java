@@ -10,11 +10,15 @@ public class Data implements Serializable {
 	public String USERNAME = null;
 	public String PASSWORD = null;
 	public ArrayList<String> FRIENDS = new ArrayList<String>();
+	public ArrayList<String> PENDING = new ArrayList<String>();
+	public ArrayList<String> REQUESTS = new ArrayList<String>();
 	
-	public Data(String USERNAME, String PASSWORD, ArrayList<String> FRIENDS) {
+	public Data(String USERNAME, String PASSWORD, ArrayList<String> FRIENDS, ArrayList<String> PENDING, ArrayList<String> REQUESTS) {
 		this.USERNAME = USERNAME;
 		this.PASSWORD = PASSWORD;
 		this.FRIENDS = FRIENDS;
+		this.PENDING = PENDING;
+		this.REQUESTS = REQUESTS;
 	}
 	
 }
