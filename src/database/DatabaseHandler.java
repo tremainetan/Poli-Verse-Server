@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import datastructures.Data;
 import datastructures.MessagePacketDB;
@@ -65,12 +66,25 @@ public class DatabaseHandler implements Runnable {
 					else if (messageIncoming.MESSAGESTRING.equals("CHECK")) {
 						//Getting Password
 						String name = messageIncoming.FROM;
-						Data data = FileManager.data.get(name);
+						Data data = FileManager.DATABASE_DATA.get(name);
 						MessagePacketDB messageSending = new MessagePacketDB(null, name, null, data, true);
 						socketOut.writeObject(messageSending);
 					}
 					else if (messageIncoming.MESSAGESTRING.equals("UPDATEDATA")) {
-						FileManager.updateData(messageIncoming.DATA);
+						FileManager.updateData((Data) messageIncoming.OBJECT);
+					}
+					else if (messageIncoming.MESSAGESTRING.equals("GETCONVERSATION")) {
+						@SuppressWarnings("unchecked")
+						Object OBJ = (ArrayList<String>) FileManager.getConversation((ArrayList<String>) messageIncoming.OBJECT);
+						MessagePacketDB messageSending = new MessagePacketDB(null, messageIncoming.FROM, null, OBJ, true);
+						socketOut.writeObject(messageSending);
+					}
+					else if (messageIncoming.MESSAGESTRING.equals("SENDMESSAGE")) {
+						String message = (String) messageIncoming.OBJECT;
+						ArrayList<String> USERS = new ArrayList<String>();
+						USERS.add(messageIncoming.FROM);
+						USERS.add(messageIncoming.TO);
+						FileManager.addLine(USERS, message);
 					}
 				}
 				else break;

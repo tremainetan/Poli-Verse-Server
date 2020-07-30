@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +14,8 @@ import datastructures.Database;
 
 public class FileManager {
 	
-	public static Map<String, Data> data = new HashMap<String, Data>();
+	public static Map<String, Data> DATABASE_DATA = new HashMap<String, Data>();
+	public static Map<ArrayList<String>, ArrayList<String>> COMMUNICATION_DATA = new HashMap<ArrayList<String>, ArrayList<String>>();
 	
 	//Call at the start of ServerMain Program
 	public FileManager() {
@@ -40,7 +42,8 @@ public class FileManager {
 		}
 		in = new ObjectInputStream(fileIn);
 		database = (Database) in.readObject();
-		data = database.DATA;
+		DATABASE_DATA = database.DATA;
+		COMMUNICATION_DATA = database.CONVERSATIONS;
 		
 		in.close();
 		fileIn.close();
@@ -58,7 +61,8 @@ public class FileManager {
 	
 	private static void updateDatabase() {
 		Database database = new Database();
-		database.DATA = data;
+		database.DATA = DATABASE_DATA;
+		database.CONVERSATIONS = COMMUNICATION_DATA;
 		try {
 			writeDatabase(database);
 		} catch (Exception e) {
@@ -69,19 +73,40 @@ public class FileManager {
 	
 	//Methods that other Classes need to use
 	public static boolean nameExists(String name) {
-		if (data.containsKey(name)) {
+		if (DATABASE_DATA.containsKey(name)) {
 			return true;
 		}
 		else return false;
 	}
 	
 	public static void addName(String name, String password) {
-		data.put(name, new Data(name, password, new ArrayList<String>(), new ArrayList<String>(), new ArrayList<String>()));
+		DATABASE_DATA.put(name, new Data(name, password, new ArrayList<String>(), new ArrayList<String>(), new ArrayList<String>()));
 		updateDatabase();
 	}
 	
 	public static void updateData(Data userData) {
-		data.put(userData.USERNAME, userData);
+		DATABASE_DATA.put(userData.USERNAME, userData);
+		updateDatabase();
+	}
+	
+	public static ArrayList<String> getConversation(ArrayList<String> USERS) {
+		try {
+			readDatabase();
+		} catch (Exception e) {e.printStackTrace();}
+		Collections.sort(USERS);
+		if (!COMMUNICATION_DATA.containsKey(USERS)) {
+			COMMUNICATION_DATA.put(USERS, new ArrayList<String>());
+			updateDatabase();
+		}
+		ArrayList<String> CONTENTS = COMMUNICATION_DATA.get(USERS);
+		return CONTENTS;
+	}
+	
+	public static void addLine(ArrayList<String> USERS, String line) {
+		Collections.sort(USERS);
+		ArrayList<String> CONVERSATION = getConversation(USERS);
+		CONVERSATION.add(line);
+		COMMUNICATION_DATA.replace(USERS, CONVERSATION);
 		updateDatabase();
 	}
 	

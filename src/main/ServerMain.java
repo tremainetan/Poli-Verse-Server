@@ -1,6 +1,6 @@
 package main;
 
-import java.net.Socket;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 
 import communication.CommunicationServer;
@@ -9,7 +9,7 @@ import framework.FileManager;
 
 public class ServerMain {
 	
-	public static HashMap<String, Socket> sockets = new HashMap<String, Socket>();
+	public static HashMap<String, ObjectOutputStream> sockets = new HashMap<String, ObjectOutputStream>();
 	
 	public ServerMain() {
 		

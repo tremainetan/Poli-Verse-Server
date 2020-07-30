@@ -56,7 +56,7 @@ public class CommunicationHandler implements Runnable {
 			}
 		}
 		synchronized (ServerMain.sockets) {
-			ServerMain.sockets.put(username, socket);
+			ServerMain.sockets.put(username, socketOut);
 		}
 	}
 	
@@ -73,7 +73,14 @@ public class CommunicationHandler implements Runnable {
 			} catch (Exception e) {}
 			
 			if (messageIncoming.CONNECTED) {
-				System.out.println("Received a message from: " + messageIncoming.FROM);
+				String FROM = messageIncoming.FROM;
+				String TO = messageIncoming.TO;
+				if (FROM != null && TO != null) {
+					MessagePacket messageSending = new MessagePacket(FROM, TO, messageIncoming.MESSAGESTRING, true);
+					try {
+						ServerMain.sockets.get(messageIncoming.TO).writeObject(messageSending);
+					} catch (IOException e) {}
+				}
 			}
 			else break;
 		}
