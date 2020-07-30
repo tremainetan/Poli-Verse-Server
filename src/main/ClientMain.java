@@ -23,9 +23,9 @@ public class ClientMain {
 	public ClientDatabase clientDatabase;
 	public ArrayList<String> quotes = new ArrayList<String>();
 	
-	private Data clientData;
+	public Data clientData;
 	
-	private String state = null;
+	public String state = null;
 	/*
 	 * null - At Main State
 	 * "<name>" - Currently Texting <name>
@@ -37,7 +37,7 @@ public class ClientMain {
 			
 			clientDatabase = new ClientDatabase(serverAddress, DATABASE_PORT);
 			
-			renderer = new Renderer();
+			renderer = new Renderer(this);
 			r = new Random();
 			quotes = FileManager.readTextFromFile("QUOTES.ini");
 			
@@ -57,12 +57,8 @@ public class ClientMain {
 			getName();
 			
 			renderer.updateTitle("Poli-Verse (" + clientData.USERNAME + ")");
-			
-			Thread databaseThread = new Thread(clientDatabase);
-			databaseThread.start();
-			clientCommunication = new ClientCommunication(serverAddress, clientData.USERNAME, COMMUNICATION_PORT);
-			Thread communicationThread = new Thread(clientCommunication);
-			communicationThread.start();
+			clientCommunication = new ClientCommunication(this, renderer, serverAddress, clientData.USERNAME, COMMUNICATION_PORT);
+			new Thread(clientCommunication).start();
 			
 			run();
 			
@@ -79,7 +75,9 @@ public class ClientMain {
 					//Main State
 					if (command.startsWith("/")) {
 						//Command
-						clientData = clientDatabase.getData(clientData.USERNAME);
+						try {
+							clientData = clientDatabase.getData(clientData.USERNAME);
+						} catch (Exception e1) {}
 						String actualCommand = command.substring(1);
 						if (actualCommand.equals("help")) {
 							renderer.print("Commands Available:");
@@ -190,7 +188,16 @@ public class ClientMain {
 							String name = actualCommand.substring(5);
 							if (clientData.FRIENDS.contains(name)) {
 								state = name;
+								ArrayList<String> CONVERSATION = null;
+								ArrayList<String> USERS = new ArrayList<String>();
+								USERS.add(clientData.USERNAME);
+								USERS.add(state);
+								try {
+									CONVERSATION = clientDatabase.getConversation(clientData.USERNAME, USERS);
+								} catch (Exception e) {}
 								renderer.updateTitle("Poli-Verse (" + clientData.USERNAME + ") [Chatting with " + state + "]");
+								renderer.clearScreen();
+								for (int i = 0; i < CONVERSATION.size(); i++) renderer.print(CONVERSATION.get(i));
 							}
 							else renderer.print(name + " is not identified as your friend");
 						}
@@ -205,12 +212,17 @@ public class ClientMain {
 						String actualCommand = command.substring(1);
 						if (actualCommand.equals("back")) {
 							renderer.updateTitle("Poli-Verse (" + clientData.USERNAME + ")");
+							renderer.clearScreen();
 							state = null;
 						}
 					}
 					else {
 						//Message to send to "<name>"
-						System.out.println("Send to " + state + ": " + command);
+						try {
+							String message = clientData.USERNAME + ": " + command;
+							clientCommunication.sendMessage(clientData.USERNAME, state, message);
+							clientDatabase.sendMessage(clientData.USERNAME, state, message);
+						} catch (Exception e) {}
 					}
 				}
 				renderer.lastCommand = "";

@@ -3,11 +3,12 @@ package database;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import datastructures.Data;
 import datastructures.MessagePacketDB;
 
-public class ClientDatabase implements Runnable {
+public class ClientDatabase {
 	
 	private Socket socket;
 	private ObjectInputStream socketIn;
@@ -24,10 +25,6 @@ public class ClientDatabase implements Runnable {
 		MessagePacketDB obj = null;
 		obj = (MessagePacketDB) socketIn.readObject();
 		return obj;
-		
-	}
-	
-	public void run() {
 		
 	}
 	
@@ -87,23 +84,31 @@ public class ClientDatabase implements Runnable {
 		updateData(toData);
 	}
 	
-	public Data getData(String name) {
+	public Data getData(String name) throws Exception {
 		Data data = null;
 		MessagePacketDB messageSending = new MessagePacketDB(name, null, "CHECK", null, true);
-		try {
-			socketOut.writeObject(messageSending);
-		}
-		catch (Exception e) {e.printStackTrace();}
+		socketOut.writeObject(messageSending);
 		MessagePacketDB messageReceive = null;
-		
-		try {
-			messageReceive = readSocketIn();
-		}
-		catch (Exception e) {}
+		messageReceive = readSocketIn();
 		if (messageReceive.FROM == null && messageReceive.TO.equals(name)) {
-			data = messageReceive.DATA;
+			data = (Data) messageReceive.OBJECT;
 		}
 		return data;
+	}
+	
+	public ArrayList<String> getConversation(String name, ArrayList<String> USERS) throws Exception {
+		MessagePacketDB messageSending = new MessagePacketDB(name, null, "GETCONVERSATION", USERS, true);
+		socketOut.writeObject(messageSending);
+		
+		MessagePacketDB messageReceive = readSocketIn();
+		@SuppressWarnings("unchecked")
+		ArrayList<String> CONVERSATION = (ArrayList<String>) messageReceive.OBJECT;
+		return CONVERSATION;
+	}
+	
+	public void sendMessage(String FROM, String TO, String MESSAGE) throws Exception {
+		MessagePacketDB messageSending = new MessagePacketDB(FROM, TO, "SENDMESSAGE", MESSAGE, true);
+		socketOut.writeObject(messageSending);
 	}
 	
 	private boolean createConnection(String serverAddress, int PORT) {

@@ -12,6 +12,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.text.DefaultCaret;
 
+import main.ClientMain;
+
 public class Renderer {
 	
 	public JFrame frame;
@@ -19,6 +21,12 @@ public class Renderer {
 	public JTextArea messageArea = new JTextArea(16, 50);
 	
 	public volatile String lastCommand = "";
+	
+	private ClientMain main;
+	
+	public Renderer(ClientMain main) {
+		this.main = main;
+	}
 	
 	public void createWindow() {
 		frame = new JFrame("Poli-Verse");
@@ -46,7 +54,8 @@ public class Renderer {
 		textField.addActionListener(
 			new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					print(textField.getText());
+					if (main.state == null) print(textField.getText());
+					else print(main.clientData.USERNAME + ": " + textField.getText());
 					lastCommand = textField.getText();
 					textField.setText("");
 				}
@@ -56,6 +65,10 @@ public class Renderer {
 	
 	public void print(String message) {
 		messageArea.append(message + "\n");
+	}
+	
+	public void clearScreen() {
+		messageArea.setText("");
 	}
 	
 	public void updateTitle(String title) {
