@@ -75,11 +75,18 @@ public class CommunicationHandler implements Runnable {
 			if (messageIncoming.CONNECTED) {
 				String FROM = messageIncoming.FROM;
 				String TO = messageIncoming.TO;
+				System.out.println("SERVER reporting, FROM: " + messageIncoming.FROM + " TO: " + messageIncoming.TO);
 				if (FROM != null && TO != null) {
 					MessagePacket messageSending = new MessagePacket(FROM, TO, messageIncoming.MESSAGESTRING, true);
-					try {
-						ServerMain.sockets.get(messageIncoming.TO).writeObject(messageSending);
-					} catch (IOException e) {}
+					ObjectOutputStream toSocket = ServerMain.sockets.get(messageIncoming.TO);
+					if (toSocket != null) {
+						try {
+							ServerMain.sockets.get(messageIncoming.TO).writeObject(messageSending);
+							System.out.println("SENT TO FRIEND");
+						} catch (IOException e) {
+							e.printStackTrace();
+						}	
+					}
 				}
 			}
 			else break;
