@@ -81,7 +81,7 @@ public class CommunicationHandler implements Runnable {
 					ObjectOutputStream toSocket = ServerMain.sockets.get(messageIncoming.TO);
 					if (toSocket != null) {
 						try {
-							ServerMain.sockets.get(messageIncoming.TO).writeObject(messageSending);
+							toSocket.writeObject(messageSending);
 							System.out.println("SENT TO FRIEND");
 						} catch (IOException e) {
 							e.printStackTrace();
