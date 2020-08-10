@@ -54,10 +54,12 @@ public class Renderer {
 		textField.addActionListener(
 			new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					if (main.state == null) print(textField.getText());
-					else print(main.clientData.USERNAME + ": " + textField.getText());
-					lastCommand = textField.getText();
-					textField.setText("");
+					if (!textField.getText().isBlank()) {
+						if (main.state == null) print(textField.getText());
+						else print(main.clientData.USERNAME + ": " + textField.getText());
+						lastCommand = textField.getText();
+						textField.setText("");
+					}
 				}
 			}
 		);

@@ -11,7 +11,7 @@ import datastructures.Data;
 import framework.FileManager;
 import framework.Renderer;
 
-public class ClientMain {
+public class ClientMain implements Runnable {
 	
 	private String serverAddress = "localhost";
 	private int COMMUNICATION_PORT = 59001;
@@ -25,14 +25,13 @@ public class ClientMain {
 	
 	public Data clientData;
 	
-	public String state = null;
+	public String state = null;	
 	/*
 	 * null - At Main State
 	 * "<name>" - Currently Texting <name>
 	 */
 	
 	public ClientMain() {
-		
 		try {
 			
 			clientDatabase = new ClientDatabase(serverAddress, DATABASE_PORT);
@@ -58,15 +57,14 @@ public class ClientMain {
 			
 			renderer.updateTitle("Poli-Verse (" + clientData.USERNAME + ")");
 			clientCommunication = new ClientCommunication(this, renderer, serverAddress, clientData.USERNAME, COMMUNICATION_PORT);
-			new Thread(clientCommunication).start();
+			clientCommunication.init();
 			
 			run();
 			
 		} catch (Exception e) {e.printStackTrace();}
-		
 	}
 	
-	private void run() {
+	public void run() {
 		while (true) {
 			while (!renderer.lastCommand.isBlank()) {
 				//Process Every Command

@@ -19,6 +19,8 @@ public class ClientCommunication implements Runnable {
 	private Renderer renderer;
 	private ClientMain main;
 	
+	private Thread thread;
+	
 	public ClientCommunication(ClientMain main, Renderer renderer, String serverAddress, String username, int PORT) {
 		
 		this.username = username;
@@ -36,16 +38,26 @@ public class ClientCommunication implements Runnable {
 		
 	}
 	
+	public void init() {
+		this.thread = new Thread(this);
+		this.thread.start();
+	}
+	
 	public void run() {
-		try {
-			MessagePacket messageReceive = readSocketIn();
-			if (messageReceive.CONNECTED) {
-				if (messageReceive.FROM != null && messageReceive.TO.equals(username)) {
-					if (main.state.equals(messageReceive.FROM)) renderer.print(messageReceive.MESSAGESTRING);
+		while (true) {
+			try {
+				MessagePacket messageReceive = readSocketIn();
+				if (messageReceive.CONNECTED) {
+					if (messageReceive.FROM != null && messageReceive.TO.equals(username)) {
+						if (main.state.equals(messageReceive.FROM)) renderer.print(messageReceive.MESSAGESTRING);
+					}
 				}
+					
+			}
+			catch (Exception e) {
+				
 			}
 		}
-		catch (Exception e) {}
 	}
 	
 	public void disconnect() throws Exception {
