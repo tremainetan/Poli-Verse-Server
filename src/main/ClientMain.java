@@ -12,7 +12,6 @@ import framework.FileManager;
 import framework.Renderer;
 
 public class ClientMain implements Runnable {
-	
 	private String serverAddress = "localhost";
 	private int COMMUNICATION_PORT = 59001;
 	private int DATABASE_PORT = 59002;
@@ -53,7 +52,7 @@ public class ClientMain implements Runnable {
 			renderer.print(quotes.get(r.nextInt(quotes.size())));
 			renderer.textField.requestFocus();
 			
-			getName();
+			login();
 			
 			renderer.updateTitle("Poli-Verse (" + clientData.USERNAME + ")");
 			clientCommunication = new ClientCommunication(this, renderer, serverAddress, clientData.USERNAME, COMMUNICATION_PORT);
@@ -239,7 +238,7 @@ public class ClientMain implements Runnable {
 		System.exit(0);
 	}
 	
-	private void getName() throws Exception {
+	private void login() throws Exception {
 		
 		String usernameInput;
 		String passwordInput;

@@ -1,15 +1,21 @@
 package framework;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JWindow;
+import javax.swing.SwingConstants;
 import javax.swing.text.DefaultCaret;
 
 import main.ClientMain;
@@ -33,6 +39,26 @@ public class Renderer {
 		
 		Font arialFont = new Font("Arial", Font.TRUETYPE_FONT, 20);
 		
+		//Splash Screen
+		JLabel imageIcon = new JLabel(new ImageIcon(ImageLoader.LOADING_PAGE), SwingConstants.CENTER);
+		JWindow window = new JWindow();
+		window.getContentPane().setBackground(new Color(88, 88, 88));
+		window.getContentPane().add(imageIcon);
+		Toolkit toolkit = Toolkit.getDefaultToolkit();  
+		int windowWidth = ((int) toolkit.getScreenSize().getWidth());  
+		int windowHeight = ((int) toolkit.getScreenSize().getHeight());  
+		window.setSize(windowWidth, windowHeight);
+		window.requestFocus();
+		window.setVisible(true);
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		window.setVisible(false);
+		window.dispose();
+		
+		//Chat Service
 		textField.setFont(arialFont);
 		textField.setEditable(true);
 		
@@ -46,11 +72,6 @@ public class Renderer {
 		contentPane.add(textField, BorderLayout.SOUTH);
 		contentPane.add(new JScrollPane(messageArea), BorderLayout.CENTER);
 		
-		frame.pack();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		frame.setVisible(true);
-		
 		textField.addActionListener(
 			new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -63,6 +84,10 @@ public class Renderer {
 				}
 			}
 		);
+		frame.pack();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		frame.setVisible(true);
 	}
 	
 	public void print(String message) {
