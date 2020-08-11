@@ -28,6 +28,11 @@ public class ClientDatabase {
 		
 	}
 	
+	public void ban(String name) throws Exception {
+		MessagePacketDB messageSending = new MessagePacketDB(name, null, "BAN", null, true);
+		socketOut.writeObject(messageSending);
+	}
+	
 	public void disconnect() throws Exception {
 		MessagePacketDB messageSending = new MessagePacketDB(null, null, null, null, false);
 		socketOut.writeObject(messageSending);
@@ -40,7 +45,7 @@ public class ClientDatabase {
 		socketOut.writeObject(messageSending);
 		
 		MessagePacketDB messageReceive = readSocketIn();
-		if (messageReceive.FROM == null && messageReceive.TO.equals(name)) {
+		if (messageReceive.FROM == null && messageReceive.TO.contains(name)) {
 			if (messageReceive.MESSAGESTRING.equals("true")) nameExists = true;
 			else nameExists = false;
 		}
@@ -50,12 +55,15 @@ public class ClientDatabase {
 	}
 	
 	public void register(String name, String password) throws Exception {
-		MessagePacketDB messageSending = new MessagePacketDB(name, password, "REGISTER", null, true);
+		ArrayList<String> list = new ArrayList<String>();
+		list.add(password);
+		MessagePacketDB messageSending = new MessagePacketDB(name, list, "REGISTER", null, true);
 		socketOut.writeObject(messageSending);
 	}
 	
 	public void updateData(Data data) throws Exception {
-		MessagePacketDB messageSending = new MessagePacketDB(data.USERNAME, null, "UPDATEDATA", data, true);
+		Data dataSending = new Data(data.USERNAME, data.PASSWORD, data.SCORE, data.FRIENDS, data.PENDING, data.REQUESTS);
+		MessagePacketDB messageSending = new MessagePacketDB(data.USERNAME, null, "UPDATEDATA", dataSending, true);
 		socketOut.writeObject(messageSending);
 	}
 	
@@ -90,7 +98,7 @@ public class ClientDatabase {
 		socketOut.writeObject(messageSending);
 		MessagePacketDB messageReceive = null;
 		messageReceive = readSocketIn();
-		if (messageReceive.FROM == null && messageReceive.TO.equals(name)) {
+		if (messageReceive.FROM == null && messageReceive.TO.contains(name)) {
 			data = (Data) messageReceive.OBJECT;
 		}
 		return data;
@@ -106,7 +114,7 @@ public class ClientDatabase {
 		return CONVERSATION;
 	}
 	
-	public void sendMessage(String FROM, String TO, String MESSAGE) throws Exception {
+	public void sendMessage(String FROM, ArrayList<String> TO, String MESSAGE) throws Exception {
 		MessagePacketDB messageSending = new MessagePacketDB(FROM, TO, "SENDMESSAGE", MESSAGE, true);
 		socketOut.writeObject(messageSending);
 	}

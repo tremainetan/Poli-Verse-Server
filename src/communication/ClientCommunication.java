@@ -3,6 +3,8 @@ package communication;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import datastructures.MessagePacket;
 import framework.Renderer;
@@ -48,8 +50,8 @@ public class ClientCommunication implements Runnable {
 			try {
 				MessagePacket messageReceive = readSocketIn();
 				if (messageReceive.CONNECTED) {
-					if (messageReceive.FROM != null && messageReceive.TO.equals(username)) {
-						if (main.state.equals(messageReceive.FROM)) renderer.print(messageReceive.MESSAGESTRING);
+					if (messageReceive.FROM != null && messageReceive.TO.contains(username)) {
+						if (main.state.contains(messageReceive.FROM)) renderer.print(messageReceive.MESSAGESTRING);
 					}
 				}
 					
@@ -65,7 +67,8 @@ public class ClientCommunication implements Runnable {
 		socketOut.writeObject(messageSending);
 	}
 	
-	public void sendMessage(String FROM, String TO, String CONTENT) throws Exception {
+	public void sendMessage(String FROM, ArrayList<String> TO, String CONTENT) throws Exception {
+		Collections.sort(TO);
 		MessagePacket messageSending = new MessagePacket(FROM, TO, CONTENT, true);
 		socketOut.writeObject(messageSending);
 	}

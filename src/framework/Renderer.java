@@ -35,30 +35,13 @@ public class Renderer {
 	}
 	
 	public void createWindow() {
+		
+		//Show Splash Screen
+		splashScreen();
+		//Chat Service
 		frame = new JFrame("Poli-Verse");
 		
 		Font arialFont = new Font("Arial", Font.TRUETYPE_FONT, 20);
-		
-		//Splash Screen
-		JLabel imageIcon = new JLabel(new ImageIcon(ImageLoader.LOADING_PAGE), SwingConstants.CENTER);
-		JWindow window = new JWindow();
-		window.getContentPane().setBackground(new Color(88, 88, 88));
-		window.getContentPane().add(imageIcon);
-		Toolkit toolkit = Toolkit.getDefaultToolkit();  
-		int windowWidth = ((int) toolkit.getScreenSize().getWidth());  
-		int windowHeight = ((int) toolkit.getScreenSize().getHeight());  
-		window.setSize(windowWidth, windowHeight);
-		window.requestFocus();
-		window.setVisible(true);
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		window.setVisible(false);
-		window.dispose();
-		
-		//Chat Service
 		textField.setFont(arialFont);
 		textField.setEditable(true);
 		
@@ -77,7 +60,6 @@ public class Renderer {
 				public void actionPerformed(ActionEvent e) {
 					if (!textField.getText().isBlank()) {
 						if (main.state == null) print(textField.getText());
-						else print(main.clientData.USERNAME + ": " + textField.getText());
 						lastCommand = textField.getText();
 						textField.setText("");
 					}
@@ -90,12 +72,34 @@ public class Renderer {
 		frame.setVisible(true);
 	}
 	
+	private void splashScreen() {
+		//Splash Screen
+		JLabel imageIcon = new JLabel(new ImageIcon(ImageLoader.LOADING_PAGE), SwingConstants.CENTER);
+		JWindow window = new JWindow();
+		window.getContentPane().setBackground(new Color(88, 88, 88));
+		window.getContentPane().add(imageIcon);
+		Toolkit toolkit = Toolkit.getDefaultToolkit();  
+		int windowWidth = ((int) toolkit.getScreenSize().getWidth());  
+		int windowHeight = ((int) toolkit.getScreenSize().getHeight());  
+		window.setSize(windowWidth, windowHeight);
+		window.requestFocus();
+		window.setVisible(true);
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		window.setVisible(false);
+		window.dispose();
+	}
+	
 	public void print(String message) {
 		messageArea.append(message + "\n");
 	}
 	
 	public void clearScreen() {
 		messageArea.setText("");
+		print(main.getRandomQuote());
 	}
 	
 	public void updateTitle(String title) {
