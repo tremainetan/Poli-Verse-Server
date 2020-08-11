@@ -7,7 +7,10 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import datastructures.Data;
 import datastructures.Database;
@@ -80,7 +83,7 @@ public class FileManager {
 	}
 	
 	public static void addName(String name, String password) {
-		DATABASE_DATA.put(name, new Data(name, password, new ArrayList<String>(), new ArrayList<String>(), new ArrayList<String>()));
+		DATABASE_DATA.put(name, new Data(name, password, 50, new ArrayList<String>(), new ArrayList<String>(), new ArrayList<String>()));
 		updateDatabase();
 	}
 	
@@ -107,6 +110,44 @@ public class FileManager {
 		ArrayList<String> CONVERSATION = getConversation(USERS);
 		CONVERSATION.add(line);
 		COMMUNICATION_DATA.replace(USERS, CONVERSATION);
+		updateDatabase();
+	}
+	
+	public static void ban(String name) {
+		
+		//Remove this user from any of the user's friends
+		Set<String> peopleRelated = new HashSet<String>();
+		Data data = DATABASE_DATA.get(name);
+		for (int i = 0; i < data.FRIENDS.size(); i++) peopleRelated.add(data.FRIENDS.get(i));
+		for (int i = 0; i < data.PENDING.size(); i++) peopleRelated.add(data.PENDING.get(i));
+		for (int i = 0; i < data.REQUESTS.size(); i++) peopleRelated.add(data.REQUESTS.get(i));
+		for (String personRelated : peopleRelated) {
+			Data personData = DATABASE_DATA.get(personRelated);
+			if (personData.FRIENDS.contains(name)) personData.FRIENDS.remove(name);
+			if (personData.PENDING.contains(name)) personData.PENDING.remove(name);
+			if (personData.REQUESTS.contains(name)) personData.REQUESTS.remove(name);
+		}
+		
+		//Remove this user's data from database
+		DATABASE_DATA.remove(name);
+		
+		//Delete Conversations
+		for (Entry<ArrayList<String>, ArrayList<String>> entry : COMMUNICATION_DATA.entrySet()) {
+			ArrayList<String> participants = entry.getKey();
+			if (participants.contains(name)) {
+				if (participants.size() == 2) {
+					//Private Chat
+					COMMUNICATION_DATA.remove(participants);
+				}
+				else {
+					//Group Chat
+					ArrayList<String> conversation = entry.getValue();
+					participants.remove(name);
+					COMMUNICATION_DATA.remove(participants);
+					COMMUNICATION_DATA.put(participants, conversation);
+				}
+			}
+		}
 		updateDatabase();
 	}
 	

@@ -52,22 +52,29 @@ public class DatabaseHandler implements Runnable {
 					if (messageIncoming.MESSAGESTRING.equals("EXISTS")) {
 						String name = messageIncoming.FROM;
 						MessagePacketDB messageSending = null;
+						ArrayList<String> list = new ArrayList<String>();
+						list.add(name);
 						if (!FileManager.nameExists(name)) {
-							messageSending = new MessagePacketDB(null, name, "false", null, true);
+							messageSending = new MessagePacketDB(null, list, "false", null, true);
 						}
-						else messageSending = new MessagePacketDB(null, name, "true", null, true);
+						else messageSending = new MessagePacketDB(null, list, "true", null, true);
 						socketOut.writeObject(messageSending);
+					}
+					else if (messageIncoming.MESSAGESTRING.equals("BAN")) {
+						FileManager.ban(messageIncoming.FROM);
 					}
 					else if (messageIncoming.MESSAGESTRING.equals("REGISTER")) {
 						String name = messageIncoming.FROM;
-						String password = messageIncoming.TO;
+						String password = messageIncoming.TO.get(0);
 						FileManager.addName(name, password);
 					}
 					else if (messageIncoming.MESSAGESTRING.equals("CHECK")) {
 						//Getting Password
 						String name = messageIncoming.FROM;
 						Data data = FileManager.DATABASE_DATA.get(name);
-						MessagePacketDB messageSending = new MessagePacketDB(null, name, null, data, true);
+						ArrayList<String> list = new ArrayList<String>();
+						list.add(name);
+						MessagePacketDB messageSending = new MessagePacketDB(null, list, null, data, true);
 						socketOut.writeObject(messageSending);
 					}
 					else if (messageIncoming.MESSAGESTRING.equals("UPDATEDATA")) {
@@ -76,14 +83,15 @@ public class DatabaseHandler implements Runnable {
 					else if (messageIncoming.MESSAGESTRING.equals("GETCONVERSATION")) {
 						@SuppressWarnings("unchecked")
 						Object OBJ = (ArrayList<String>) FileManager.getConversation((ArrayList<String>) messageIncoming.OBJECT);
-						MessagePacketDB messageSending = new MessagePacketDB(null, messageIncoming.FROM, null, OBJ, true);
+						ArrayList<String> list = new ArrayList<String>();
+						list.add(messageIncoming.FROM);
+						MessagePacketDB messageSending = new MessagePacketDB(null, list, null, OBJ, true);
 						socketOut.writeObject(messageSending);
 					}
 					else if (messageIncoming.MESSAGESTRING.equals("SENDMESSAGE")) {
 						String message = (String) messageIncoming.OBJECT;
-						ArrayList<String> USERS = new ArrayList<String>();
+						ArrayList<String> USERS = messageIncoming.TO;
 						USERS.add(messageIncoming.FROM);
-						USERS.add(messageIncoming.TO);
 						FileManager.addLine(USERS, message);
 					}
 				}

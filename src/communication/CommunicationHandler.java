@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import datastructures.MessagePacket;
 import main.ServerMain;
@@ -74,19 +76,26 @@ public class CommunicationHandler implements Runnable {
 			
 			if (messageIncoming.CONNECTED) {
 				String FROM = messageIncoming.FROM;
-				String TO = messageIncoming.TO;
-				System.out.println("SERVER reporting, FROM: " + messageIncoming.FROM + " TO: " + messageIncoming.TO);
+				ArrayList<String> TO = messageIncoming.TO;
 				if (FROM != null && TO != null) {
 					MessagePacket messageSending = new MessagePacket(FROM, TO, messageIncoming.MESSAGESTRING, true);
-					ObjectOutputStream toSocket = ServerMain.sockets.get(messageIncoming.TO);
-					if (toSocket != null) {
-						try {
-							toSocket.writeObject(messageSending);
-							System.out.println("SENT TO FRIEND");
-						} catch (IOException e) {
-							e.printStackTrace();
-						}	
+					Collections.sort(TO);
+					ArrayList<ObjectOutputStream> toSockets = new ArrayList<ObjectOutputStream>();
+					for (int i = 0; i < TO.size(); i++) {
+						String nameTo = TO.get(i);
+						toSockets.add(ServerMain.sockets.get(nameTo));
 					}
+					for (int i = 0; i < toSockets.size(); i++) {
+						ObjectOutputStream toSocket = toSockets.get(i);
+						if (toSocket != null) {
+							try {
+								toSocket.writeObject(messageSending);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}	
+						}
+					}
+					
 				}
 			}
 			else break;
